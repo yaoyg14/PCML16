@@ -93,5 +93,5 @@ def least_squares_SGD(y, tx, initial_w, batch_size, max_iters, gamma):
 def ridge_regression(y, tx, lambda_):
     """implement ridge regression."""
     I = np.eye(len(tx.T))
-    weight=np.linalg.solve(tx.T @ tx + lamb*I,tx.T@ y)
+    weight=np.linalg.solve(tx.T @ tx + lambda_*I,tx.T@ y)
     return weight

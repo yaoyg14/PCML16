@@ -1,4 +1,5 @@
 import numpy as np
+from helpers import *
 
 def compute_mse(y, tx, w):
     """Calculate the loss using mse"""
@@ -48,9 +49,9 @@ def least_squares(y, tx):
 
 def least_squares_GD(y, tx, initial_w, gamma, max_iters):
     """Gradient descent algorithm with mse."""
-    return gradient_descent(y, tx, initial_w, gamma, compute_mse, compute_mse_gradient)
+    return gradient_descent(y, tx, initial_w, gamma, max_iters, compute_mse, compute_mse_gradient)
 
-def least_squares_SGD(y, tx, initial_w, batch_size, max_iters, gamma):
+def least_squares_SGD(y, tx, initial_w, batch_size, gamma, max_iters):
     """Stochastic gradient descent algorithm with mse."""
     return stochastic_gradient_descent(y, tx, initial_w, batch_size, max_iters, gamma, compute_mse, compute_mse_gradient)
 

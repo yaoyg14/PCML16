@@ -10,7 +10,7 @@ def compute_mse_gradient(y, tx, w):
     """Compute the gradient of mse"""
     return -tx.T @ (y - tx @ w) / len(y)
 
-def gradient_descent(y, tx, initial_w, max_iters, gamma, loss_func, grad_func, epsilon = 1e-6):
+def gradient_descent(y, tx, initial_w, gamma, max_iters, loss_func, grad_func, epsilon = 1e-6):
     """Gradient descent algorithm."""
     w = initial_w
 
@@ -25,7 +25,7 @@ def gradient_descent(y, tx, initial_w, max_iters, gamma, loss_func, grad_func, e
         
     return loss, w
 
-def stochastic_gradient_descent(y, tx, initial_w, max_iters, gamma, batch_size, loss_func, grad_func, epsilon = 1e-6):
+def stochastic_gradient_descent(y, tx, initial_w, gamma, max_iters, batch_size, loss_func, grad_func, epsilon = 1e-6):
     """Stochastic gradient descent algorithm."""
     w = initial_w
     
@@ -42,18 +42,36 @@ def stochastic_gradient_descent(y, tx, initial_w, max_iters, gamma, batch_size, 
 
 def least_squares(y, tx):
     """calculate the least squares solution."""
-    weight=np.linalg.solve(tx.T @ tx, tx.T @ y)
-    return weight
+    tx_t = tx.T
+    return np.linalg.solve(tx_t @ tx, tx_t @ y)
 
-def least_squares_GD(y, tx, initial_w, max_iters, gamma):
+def least_squares_GD(y, tx, initial_w, gamma, max_iters):
     """Gradient descent algorithm with mse."""
-    return gradient_descent(y, tx, initial_w, max_iters, gamma, compute_mse, compute_mse_gradient)
+    return gradient_descent(y, tx, initial_w, gamma, max_iters, compute_mse, compute_mse_gradient)
 
-def least_squares_SGD(y, tx, initial_w, max_iters, gamma, batch_size):
+def least_squares_SGD(y, tx, initial_w, gamma, max_iters, batch_size):
     """Stochastic gradient descent algorithm with mse."""
-    return stochastic_gradient_descent(y, tx, initial_w, max_iters, gamma, batch_size, compute_mse, compute_mse_gradient)
+    return stochastic_gradient_descent(y, tx, initial_w, gamma, max_iters, batch_size, compute_mse, compute_mse_gradient)
 
 def ridge_regression(y, tx, lambda_):
     """implement ridge regression."""
     tx_t = tx.T
     return np.linalg.solve(tx_t @ tx + lambda_ * np.eye(len(tx_t)), tx_t @ y)
+
+def logistic_regression(y, tx, initial_w, gamma, max_iters):
+    """Logistic regression"""
+    def logistfun(x):
+        exp = np.exp(x)
+        return exp / (1 + exp)
+    
+    def loss(y, tx, w):
+        res = 0
+        for n in range(len(y)):
+            txn_t_x_w = tx[n].T @ w
+            res += np.log(1 + np.exp(txn_t_x_w)) - y[n] * txn_t_x_w
+        return np.abs(res)
+    
+    def grad(y, tx, w):
+        return tx.T @ (logistfun(tx @ w) - y)
+    
+    return gradient_descent(y, tx, initial_w, gamma, max_iters, loss, grad)

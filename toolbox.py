@@ -10,7 +10,7 @@ def compute_mse_gradient(y, tx, w):
     """Compute the gradient of mse"""
     return -tx.T @ (y - tx @ w) / len(y)
 
-def gradient_descent(y, tx, initial_w, gamma, max_iters, loss_func, grad_func, epsilon = 1e-6):
+def gradient_descent(y, tx, initial_w, max_iters, gamma, loss_func, grad_func, epsilon = 1e-6):
     """Gradient descent algorithm."""
     w = initial_w
 
@@ -25,19 +25,17 @@ def gradient_descent(y, tx, initial_w, gamma, max_iters, loss_func, grad_func, e
         
     return loss, w
 
-def stochastic_gradient_descent(y, tx, initial_w, batch_size, max_iters, gamma, loss_func, grad_func, epsilon = 1e-6):
+def stochastic_gradient_descent(y, tx, initial_w, max_iters, gamma, batch_size, loss_func, grad_func, epsilon = 1e-6):
     """Stochastic gradient descent algorithm."""
     w = initial_w
-    gen = batch_iter(y, tx, batch_size)
     
-    for n_iter in range(max_iters):
+    for mini_y, mini_tx in batch_iter(y, tx, max_iters):
         loss = loss_func(y, tx, w)
         
         if loss < epsilon:
             break
         
-        yp, txp = next(gen)
-        grad = grad_func(yp, txp, w)
+        grad = grad_func(mini_y, mini_tx, w)
         w -= gamma * grad
         
     return loss, w
@@ -47,13 +45,13 @@ def least_squares(y, tx):
     weight=np.linalg.solve(tx.T @ tx, tx.T @ y)
     return weight
 
-def least_squares_GD(y, tx, initial_w, gamma, max_iters):
+def least_squares_GD(y, tx, initial_w, max_iters, gamma):
     """Gradient descent algorithm with mse."""
-    return gradient_descent(y, tx, initial_w, gamma, max_iters, compute_mse, compute_mse_gradient)
+    return gradient_descent(y, tx, initial_w, max_iters, gamma, compute_mse, compute_mse_gradient)
 
-def least_squares_SGD(y, tx, initial_w, batch_size, gamma, max_iters):
+def least_squares_SGD(y, tx, initial_w, max_iters, gamma, batch_size):
     """Stochastic gradient descent algorithm with mse."""
-    return stochastic_gradient_descent(y, tx, initial_w, batch_size, max_iters, gamma, compute_mse, compute_mse_gradient)
+    return stochastic_gradient_descent(y, tx, initial_w, max_iters, gamma, batch_size, compute_mse, compute_mse_gradient)
 
 def ridge_regression(y, tx, lambda_):
     """implement ridge regression."""

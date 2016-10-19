@@ -58,20 +58,21 @@ def ridge_regression(y, tx, lambda_):
     tx_t = tx.T
     return np.linalg.solve(tx_t @ tx + lambda_ * np.eye(len(tx_t)), tx_t @ y)
 
+def logistfun(x):
+    exp = np.exp(x)
+    return exp / (1 + exp)
+    
 def logistic_regression(y, tx, initial_w, gamma, max_iters):
     """Logistic regression"""
-    def logistfun(x):
-        exp = np.exp(x)
-        return exp / (1 + exp)
     
     def loss(y, tx, w):
         res = 0
         for n in range(len(y)):
             txn_t_x_w = tx[n].T @ w
             res += np.log(1 + np.exp(txn_t_x_w)) - y[n] * txn_t_x_w
-        return np.abs(res)
+        return np.abs(res) / len(y)
     
     def grad(y, tx, w):
-        return tx.T @ (logistfun(tx @ w) - y)
+        return (tx.T @ (logistfun(tx @ w) - y)) / len(y)
     
     return gradient_descent(y, tx, initial_w, gamma, max_iters, loss, grad)

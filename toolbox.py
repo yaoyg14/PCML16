@@ -28,16 +28,17 @@ def gradient_descent(y, tx, initial_w, gamma, max_iters, loss_func, grad_func, e
 def stochastic_gradient_descent(y, tx, initial_w, gamma, max_iters, batch_size, loss_func, grad_func, epsilon = 1e-6):
     """Stochastic gradient descent algorithm."""
     w = initial_w
-    
-    for n_iter in range(max_iters):
-        for mini_y, mini_tx in batch_iter(y, tx, batch_size, 1):
-            loss = loss_func(y, tx, w)
-            
-            if loss < epsilon:
-                break
-            
-            grad = grad_func(mini_y, mini_tx, w)
-            w -= gamma * grad
+    i = 0
+    for mini_y, mini_tx in batch_iter(y, tx, batch_size, max_iters):
+        loss = loss_func(y, tx, w)
+        if mini_tx.shape[0] == 0:
+            print(i)
+        i += 1
+        if loss < epsilon:
+            break
+        
+        grad = grad_func(mini_y, mini_tx, w)
+        w -= gamma * grad
             
     return loss, w
 
@@ -66,10 +67,11 @@ def logistfun(x):
 def logistic_regression(y, tx, initial_w, gamma, max_iters):
     """Logistic regression"""
     def loss(y, tx, w):
-        txn_t_x_w = tx @ w
-        return np.abs(np.sum(np.log(1 + np.exp(txn_t_x_w)) - y * txn_t_x_w)) / len(y)
+        #txn_t_x_w = tx @ w
+        #return np.abs(np.sum(np.log(1 + np.exp(txn_t_x_w)) - y * txn_t_x_w)) / len(y)
+        return 1
     
     def grad(y, tx, w):
         return (tx.T @ (logistfun(tx @ w) - y)) / len(y)
     
-    return stochastic_gradient_descent(y, tx, initial_w, gamma, max_iters, 500, loss, grad)
+    return stochastic_gradient_descent(y, tx, initial_w, gamma, max_iters, 1000, loss, grad)

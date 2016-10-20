@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.special import expit
 from helpers import *
 
 def compute_mse(y, tx, w):
@@ -59,10 +60,6 @@ def ridge_regression(y, tx, lambda_):
     """implement ridge regression."""
     tx_t = tx.T
     return np.linalg.solve(tx_t @ tx + lambda_ * np.eye(len(tx_t)), tx_t @ y)
-
-def logistfun(x):
-    exp = np.exp(x)
-    return exp / (1 + exp)
     
 def logistic_regression(y, tx, initial_w, gamma, max_iters):
     """Logistic regression"""
@@ -72,6 +69,6 @@ def logistic_regression(y, tx, initial_w, gamma, max_iters):
         return 1
     
     def grad(y, tx, w):
-        return (tx.T @ (logistfun(tx @ w) - y)) / len(y)
+        return (tx.T @ (expit(tx @ w) - y)) / len(y)
     
     return stochastic_gradient_descent(y, tx, initial_w, gamma, max_iters, 1000, loss, grad)

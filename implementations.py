@@ -12,12 +12,14 @@ def gradient_descent(y, tx, initial_w, gamma, max_iters, loss_func, grad_func):
         
     return w, loss_func(y, tx, w)
 
-def stochastic_gradient_descent(y, tx, initial_w, gamma, max_iters, batch_size, loss_func, grad_func):
+# optimized for batch_size=1, as required...
+def stochastic_gradient_descent(y, tx, initial_w, gamma, max_iters, loss_func, grad_func):
     """Stochastic gradient descent algorithm."""
-    w = initial_w
+    w, sample_count = initial_w, len(y)
 
-    for mini_y, mini_tx in batch_iter(y, tx, batch_size, max_iters):
-        grad = grad_func(mini_y, mini_tx, w)
+    for n_iter in range(max_iters):
+        rnd = np.random.randint(sample_count)
+        grad = grad_func(y[rnd : rnd + 1], tx[rnd : rnd + 1], w)
         w -= gamma * grad
             
     return w, loss_func(y, tx, w)
@@ -42,7 +44,7 @@ def least_squares_GD(y, tx, initial_w, max_iters, gamma):
 
 def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     """Stochastic gradient descent algorithm with mse."""
-    return stochastic_gradient_descent(y, tx, initial_w, gamma, max_iters, 1, compute_mse, compute_mse_gradient)
+    return stochastic_gradient_descent(y, tx, initial_w, gamma, max_iters, compute_mse, compute_mse_gradient)
 
 def ridge_regression(y, tx, lambda_):
     """implement ridge regression."""
@@ -51,11 +53,18 @@ def ridge_regression(y, tx, lambda_):
     
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
     """Logistic regression"""
-    def loss(y, tx, w):
-        txn_t_x_w = tx @ w
-        return np.abs(np.sum(np.log(1 + np.exp(txn_t_x_w)) - y * txn_t_x_w)) / len(y)
+    w, sample_count = initial_w, len(y)
     
-    def grad(y, tx, w):
-        return (tx.T @ (expit(tx @ w) - y)) / len(y)
+    for i in range(max_iters):
+        shuffle_indices = np.random.permutation(np.arange(sample_count))
+        shuffled_y = y[shuffle_indices]
+        shuffled_tx = tx[shuffle_indices]
+        i = 0
+        while i < sample_count:
+            y_rnd, tx_rnd = shuffled_y[i], shuffled_tx[i]
+            w -= tx_rnd.T * (gamma * (expit(tx_rnd @ w) - y_rnd))
+            i += 1
     
-    return stochastic_gradient_descent(y, tx, initial_w, gamma, max_iters, 1, loss, grad)
+    #gradient_descent(y, tx, initial_w, gamma, max_iters, lambda y, tx, w: 1, lambda y, tx, w: tx.T @ (expit(tx @ w) - y) / len(y))
+    tx_w = tx @ w
+    return w, np.abs(np.sum(np.log(1 + np.exp(tx_w)) - y * tx_w)) / len(y)

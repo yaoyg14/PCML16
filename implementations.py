@@ -10,7 +10,7 @@ def gradient_descent(y, tx, initial_w, gamma, max_iters, loss_func, grad_func):
         grad = grad_func(y, tx, w)
         w -= gamma * grad
         
-    return loss_func(y, tx, w), w
+    return w, loss_func(y, tx, w)
 
 def stochastic_gradient_descent(y, tx, initial_w, gamma, max_iters, batch_size, loss_func, grad_func):
     """Stochastic gradient descent algorithm."""
@@ -20,7 +20,7 @@ def stochastic_gradient_descent(y, tx, initial_w, gamma, max_iters, batch_size, 
         grad = grad_func(mini_y, mini_tx, w)
         w -= gamma * grad
             
-    return loss_func(y, tx, w), w
+    return w, loss_func(y, tx, w)
 
 def compute_mse(y, tx, w):
     """Calculate the loss using mse"""
@@ -36,20 +36,20 @@ def least_squares(y, tx):
     tx_t = tx.T
     return np.linalg.solve(tx_t @ tx, tx_t @ y)
 
-def least_squares_GD(y, tx, gamma, max_iters):
+def least_squares_GD(y, tx, initial_w, max_iters, gamma):
     """Gradient descent algorithm with mse."""
-    return gradient_descent(y, tx, np.zeros(tx.shape[1]), gamma, max_iters, compute_mse, compute_mse_gradient)
+    return gradient_descent(y, tx, initial_w, gamma, max_iters, compute_mse, compute_mse_gradient)
 
-def least_squares_SGD(y, tx, gamma, max_iters, batch_size):
+def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     """Stochastic gradient descent algorithm with mse."""
-    return stochastic_gradient_descent(y, tx, np.zeros(tx.shape[1]), gamma, max_iters, batch_size, compute_mse, compute_mse_gradient)
+    return stochastic_gradient_descent(y, tx, initial_w, gamma, max_iters, 1, compute_mse, compute_mse_gradient)
 
 def ridge_regression(y, tx, lambda_):
     """implement ridge regression."""
     tx_t = tx.T
     return np.linalg.solve(tx_t @ tx + lambda_ * np.eye(len(tx_t)), tx_t @ y)
     
-def logistic_regression(y, tx, gamma, max_iters):
+def logistic_regression(y, tx, initial_w, max_iters, gamma):
     """Logistic regression"""
     def loss(y, tx, w):
         txn_t_x_w = tx @ w
@@ -58,4 +58,4 @@ def logistic_regression(y, tx, gamma, max_iters):
     def grad(y, tx, w):
         return (tx.T @ (expit(tx @ w) - y)) / len(y)
     
-    return stochastic_gradient_descent(y, tx, np.zeros(tx.shape[1]), gamma, max_iters, 1000, loss, grad)
+    return stochastic_gradient_descent(y, tx, initial_w, gamma, max_iters, 1, loss, grad)

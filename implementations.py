@@ -53,18 +53,11 @@ def ridge_regression(y, tx, lambda_):
     
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
     """Logistic regression"""
-    w, sample_count = initial_w, len(y)
+    w, sample_count, batch_size = initial_w, len(y), 1000
+
+    for mini_y, mini_tx in batch_iter(y, tx, batch_size, int(sample_count / batch_size) * max_iters, shuffle = False):
+        grad = (mini_tx.T @ (expit(mini_tx @ w) - mini_y)) / batch_size
+        w -= gamma * grad
     
-    for i in range(max_iters):
-        shuffle_indices = np.random.permutation(np.arange(sample_count))
-        shuffled_y = y[shuffle_indices]
-        shuffled_tx = tx[shuffle_indices]
-        i = 0
-        while i < sample_count:
-            y_rnd, tx_rnd = shuffled_y[i], shuffled_tx[i]
-            w -= tx_rnd.T * (gamma * (expit(tx_rnd @ w) - y_rnd))
-            i += 1
-    
-    #gradient_descent(y, tx, initial_w, gamma, max_iters, lambda y, tx, w: 1, lambda y, tx, w: tx.T @ (expit(tx @ w) - y) / len(y))
     tx_w = tx @ w
     return w, np.abs(np.sum(np.log(1 + np.exp(tx_w)) - y * tx_w)) / len(y)

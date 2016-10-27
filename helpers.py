@@ -14,16 +14,11 @@ def standardize(x, mean_x=None, std_x=None):
     tx = np.hstack((np.ones((x.shape[0],1)), x))
     return tx, mean_x, std_x
 
-
-def batch_iter(y, tx, batch_size, num_batches=None, shuffle=True):
+def batch_iter(y, tx, batch_size, num_batches, shuffle=True):
     """
-    Generate a minibatch iterator for a dataset.
-    Takes as input two iterables (here the output desired values 'y' and the input data 'tx')
-    Outputs an iterator which gives mini-batches of `batch_size` matching elements from `y` and `tx`.
-    Data can be randomly shuffled to avoid ordering in the original data messing with the randomness of the minibatches.
-    Example of use :
-    for minibatch_y, minibatch_tx in batch_iter(y, tx, 32):
-        <DO-SOMETHING>
+    Modified!
+    Will yield in total num_batches batches of size batch_size.
+    If num_batches is bigger than the size of the dataset, if will wrap around it.
     """
     data_size = len(y)
 

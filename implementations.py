@@ -61,3 +61,17 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     
     tx_w = tx @ w
     return w, np.abs(np.sum(np.log(1 + np.exp(tx_w)) - y * tx_w)) / len(y)
+
+def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
+    """Regularized logistic regression"""
+    if lambda_ == 0: # small optimization
+        return logistic_regression(y, tx, initial_w, max_iters, gamma)
+    
+    w, sample_count, batch_size = initial_w, len(y), 1000
+
+    for mini_y, mini_tx in batch_iter(y, tx, batch_size, int(sample_count / batch_size) * max_iters, shuffle = False):
+        grad = (mini_tx.T @ (expit(mini_tx @ w) - mini_y) - 2 * lambda_ * w) / batch_size
+        w -= gamma * grad
+    
+    tx_w = tx @ w
+    return w, np.abs(np.sum(np.log(1 + np.exp(tx_w)) - y * tx_w)) / len(y)

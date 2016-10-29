@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.special import expit
 from helpers import *
 
 def gradient_descent(y, tx, initial_w, gamma, max_iters, loss_func, grad_func):
@@ -50,14 +49,19 @@ def ridge_regression(y, tx, lambda_):
     """implement ridge regression."""
     tx_t = tx.T
     return np.linalg.solve(tx_t @ tx + lambda_ * np.eye(len(tx_t)), tx_t @ y)
-    
+
+def sigmoid(x):
+    return 1. / (1. + np.exp(-x))
+
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
     """Logistic regression"""
     w, sample_count, batch_size = initial_w, len(y), 1000
+    batch_count = int(sample_count / batch_size) * max_iters
 
-    for mini_y, mini_tx in batch_iter(y, tx, batch_size, int(sample_count / batch_size) * max_iters, shuffle = False):
-        grad = (mini_tx.T @ (expit(mini_tx @ w) - mini_y)) / batch_size
-        w -= gamma * grad
+    fact = gamma / batch_size
+    for mini_y, mini_tx in batch_iter(y, tx, batch_size, batch_count, shuffle = False):
+        grad = mini_tx.T @ (sigmoid(mini_tx @ w) - mini_y)
+        w -= fact * grad
     
     tx_w = tx @ w
     return w, np.abs(np.sum(np.log(1 + np.exp(tx_w)) - y * tx_w)) / len(y)
@@ -68,10 +72,12 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
         return logistic_regression(y, tx, initial_w, max_iters, gamma)
     
     w, sample_count, batch_size = initial_w, len(y), 1000
+    batch_count = int(sample_count / batch_size) * max_iters
 
-    for mini_y, mini_tx in batch_iter(y, tx, batch_size, int(sample_count / batch_size) * max_iters, shuffle = False):
-        grad = (mini_tx.T @ (expit(mini_tx @ w) - mini_y) - 2 * lambda_ * w) / batch_size
-        w -= gamma * grad
+    fact = gamma / batch_size
+    for mini_y, mini_tx in batch_iter(y, tx, batch_size, batch_count, shuffle = False):
+        grad = mini_tx.T @ (sigmoid(mini_tx @ w) - mini_y) - 2 * lambda_ * w
+        w -= fact * grad
     
     tx_w = tx @ w
     return w, np.abs(np.sum(np.log(1 + np.exp(tx_w)) - y * tx_w)) / len(y)

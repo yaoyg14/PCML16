@@ -76,8 +76,8 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
 
     fact = gamma / batch_size
     for mini_y, mini_tx in batch_iter(y, tx, batch_size, batch_count, shuffle = False):
-        grad = mini_tx.T @ (sigmoid(mini_tx @ w) - mini_y) - 2 * lambda_ * w
+        grad = mini_tx.T @ (sigmoid(mini_tx @ w) - mini_y) + 2 * lambda_ * w
         w -= fact * grad
     
     tx_w = tx @ w
-    return w, np.abs(np.sum(np.log(1 + np.exp(tx_w)) - y * tx_w)) / len(y)
+    return w, np.abs(np.sum(np.log(1 + np.exp(tx_w)) - y * tx_w)+lambda_ * w @ w) / len(y)

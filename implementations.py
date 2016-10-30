@@ -2,7 +2,8 @@ import numpy as np
 from helpers import *
 
 def gradient_descent(y, tx, initial_w, gamma, max_iters, loss_func, grad_func):
-    """Gradient descent algorithm."""
+    """Gradient descent algorithm. Loss function and gradient function are
+       abstracted out in loss_func and grad_func."""
     w = initial_w
 
     for n_iter in range(max_iters):
@@ -13,7 +14,8 @@ def gradient_descent(y, tx, initial_w, gamma, max_iters, loss_func, grad_func):
 
 # optimized for batch_size=1, as required...
 def stochastic_gradient_descent(y, tx, initial_w, gamma, max_iters, loss_func, grad_func):
-    """Stochastic gradient descent algorithm."""
+    """Stochastic gradient descent algorithm. Loss function and gradient function are
+       abstracted out in loss_func and grad_func."""
     w, sample_count = initial_w, len(y)
 
     for n_iter in range(max_iters):
@@ -24,16 +26,16 @@ def stochastic_gradient_descent(y, tx, initial_w, gamma, max_iters, loss_func, g
     return w, loss_func(y, tx, w)
 
 def compute_mse(y, tx, w):
-    """Calculate the loss using mse"""
+    """Computes the loss using mse."""
     e = y - tx @ w
     return e.T @ e * 0.5 / len(y)
 
 def compute_mse_gradient(y, tx, w):
-    """Compute the gradient of mse"""
+    """Computes the gradient of mse."""
     return -tx.T @ (y - tx @ w) / len(y)
 
 def least_squares(y, tx):
-    """calculate the least squares solution."""
+    """Computes the least squares solution."""
     tx_t = tx.T
     return np.linalg.solve(tx_t @ tx, tx_t @ y)
 
@@ -46,15 +48,17 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     return stochastic_gradient_descent(y, tx, initial_w, gamma, max_iters, compute_mse, compute_mse_gradient)
 
 def ridge_regression(y, tx, lambda_):
-    """implement ridge regression."""
+    """Performs ridge regression."""
     tx_t = tx.T
     return np.linalg.solve(tx_t @ tx + lambda_ * np.eye(len(tx_t)), tx_t @ y)
 
 def sigmoid(x):
+    """Computes exp(x) / (1 + exp(x))"""
     return 1. / (1. + np.exp(-x))
 
 def logistic_regression(y, tx, initial_w, max_iters, gamma):
-    """Logistic regression"""
+    """Performs logistic regression. 
+       A custom minibatched gradient descent is used."""
     w, sample_count, batch_size = initial_w, len(y), 1000
     batch_count = int(sample_count / batch_size) * max_iters
 
@@ -67,7 +71,8 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     return w, np.abs(np.sum(np.log(1 + np.exp(tx_w)) - y * tx_w)) / len(y)
 
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
-    """Regularized logistic regression"""
+    """Regularized logistic regression.
+       A custom minibatched gradient descent is used."""
     if lambda_ == 0: # small optimization
         return logistic_regression(y, tx, initial_w, max_iters, gamma)
     
@@ -80,4 +85,4 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
         w -= fact * grad
     
     tx_w = tx @ w
-    return w, np.abs(np.sum(np.log(1 + np.exp(tx_w)) - y * tx_w)+lambda_ * w @ w) / len(y)
+    return w, np.abs(np.sum(np.log(1 + np.exp(tx_w)) - y * tx_w) + lambda_ * w @ w) / len(y)
